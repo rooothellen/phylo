@@ -1,0 +1,23 @@
+#NEXUS
+[R-package APE, Tue Jan 20 11:53:49 2026]
+
+BEGIN TAXA;
+	DIMENSIONS NTAX = 5;
+	TAXLABELS
+		human
+		mouse
+		lizard
+		frog
+		fish
+	;
+END;
+BEGIN TREES;
+	TRANSLATE
+		1	human,
+		2	mouse,
+		3	lizard,
+		4	frog,
+		5	fish
+	;
+	TREE * UNTITLED = [&R] ((((1,2),3),4),5);
+END;
