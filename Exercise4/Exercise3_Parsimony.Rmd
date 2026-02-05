@@ -1,0 +1,68 @@
+---
+title: "Parsimony Exercise"
+output:
+  html_document: default
+  pdf_document: default
+date: "2026-02-03"
+author: Ruth Walters
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(phangorn)
+```
+
+```{r}
+primate <- read.delim("data/data.txt")
+```
+
+```{r}
+primate
+```
+
+
+```{r}
+primate_df <- data.frame(primate[,2:11], row.names = primate[,1])
+primate.mat <- as.matrix(primate_df)
+levels <- c("0", "1", "2", "3")
+primate.phy <- phyDat(primate.mat, type = "USER", levels = levels)
+primate.phy
+```
+
+```{r}
+dm <- dist.hamming(primate.phy)
+treeUPGMA <- upgma(dm)
+```
+
+```{r}
+tree_parsimony <- optim.parsimony(treeUPGMA, primate.phy)
+```
+
+**Question 1**: It runs very quickly (< 1 second). Returns a p-score of 21 after 1 nni operation. 
+
+```{r}
+plot.phylo(tree_parsimony)
+```
+
+**Question 3**: The root taxon has three branches (it is not properly bifurcated).
+
+```{r}
+tree_parsimony <- root(tree_parsimony, 
+                       outgroup = "ringtailed_lemur", 
+                       resolve.root = TRUE)
+
+plot.phylo(tree_parsimony)
+```
+
+**Question 5**: Rhesus monkey + chimpanzee + gorilla form a monophlyetic clade. All the organisms in this group have:
+
+-  a protruding jaw, enlongated canines, a prominent orbital ridge/crest, a bony step-off at the back of the skull
+- a similar number of cranial vein holes in their skull
+- orbital diameter
+- number of teeth and pointy molars
+
+Among these traits, the ones that are not shared by other organisms (suggesting a synaptomorphy) include the protruding jaw.
+

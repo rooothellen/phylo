@@ -1,0 +1,126 @@
+---
+title: "Parsimony Analysis of DNA"
+author: Ruth Walters
+output: html_document
+date: "2026-02-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import dependencies
+
+```{r import-libs}
+library(phangorn)
+library(ape)
+```
+
+```{r import-msa, message=FALSE, warning=FALSE}
+BiocManager::install("msa")
+library(msa)
+```
+
+## Load data from the previous exercise
+
+```{r read-character-data}
+primate <- read.delim("data/data.txt")
+```
+
+```{r process-character-data}
+primate_df <- data.frame(primate[,2:11], row.names = primate[,1])
+primate.mat <- as.matrix(primate_df)
+levels <- c("0", "1", "2", "3")
+primate.phy <- phyDat(primate.mat, type = "USER", levels = levels)
+```
+
+```{r map-character-data}
+dm <- dist.hamming(primate.phy)
+treeUPGMA <- upgma(dm)
+```
+
+```{r}
+tree <- optim.parsimony(treeUPGMA, primate.phy)
+```
+
+
+```{r}
+tree_parsimony <- root(tree, 
+                       outgroup = "ringtailed_lemur", 
+                       resolve.root = TRUE)
+```
+
+## Load the FASTA file
+
+```{r}
+seqs <- readDNAStringSet("data/primates.raw.fasta")
+
+seqs
+```
+
+```{r}
+primate.aligned <- msa(seqs, 
+                       method = "Muscle")
+
+primate.aligned
+```
+
+```{r eval=FALSE, include=FALSE}
+msaPrettyPrint(primate.aligned, 
+               output = "pdf")
+```
+
+**Question 1**: While there are only 2 gaps visible, there are several mismatches visible. This suggests that gaps were penalized more heavily than mismatches. 
+
+```{r}
+primate.aligned.convert <- as.DNAbin(primate.aligned)
+
+write.FASTA(primate.aligned.convert,
+            file = "data/primate.raw.aligned.fasta")
+```
+
+## Parsimony analysis
+
+```{r}
+primates <- read.phyDat("data/primate.raw.aligned.fasta",
+                        format = "fasta")
+
+primates
+```
+
+```{r}
+tree <- optim.parsimony(treeUPGMA, primates)
+```
+
+**Question 2**: p-score is 976 after 5 nni operations
+
+```{r}
+plot.phylo(tree)
+```
+
+
+```{r}
+tree.rooted <- root(tree, 
+                    outgroup = "ringtailed_lemur",
+                    resolve.root = TRUE)
+```
+
+```{r}
+plot.phylo(tree.rooted)
+```
+
+**Question 4**: The character that we are examining today is nucleotide sequence, and the associated character states is the nucleotide base (A/T/G/C) present at a specific site in the genome. These character states won't change across organisms like plants because all organisms on earth retain the same nucleotide bases. 
+
+**Question 5**: No, my tree looks the same as everyone else in the room. This occurs because we were using the same genomes to preform the alignment and essentially comparing the exact same characteristics. 
+
+```{r}
+plot.phylo(tree_parsimony)
+```
+
+**Question 6**: My tree based on morphology suggests that rhesus monkeys are more closely related to chimpanzees, and implicitly places humans closer to great apes than the primates. The gene-based phylogeny is able to more accurately capture the evolution from monkeys to apes to primates. 
+
+**Question 7**: Gene-based phylogenies seem more accurate/objective than character-based phylogenies. One reason for this might be because character-based phylogenies are vulnerable to biases like size (for example, humans might be classed as more closely related to larger organisms than chimpanzees) while gene alignments are not sensitive to this. 
+
+
+
+

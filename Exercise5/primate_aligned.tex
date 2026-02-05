@@ -1,0 +1,44 @@
+\documentclass[10pt]{article}
+
+\usepackage{texshade}
+
+\headheight=0pt
+\headsep=0pt
+\hoffset=0pt
+\voffset=0pt
+\paperwidth=11in
+\paperheight=8.5in
+\ifx\pdfoutput\undefined
+\relax
+\else
+\pdfpagewidth=\paperwidth
+\pdfpageheight=\paperheight
+\fi
+\oddsidemargin=-0.9in
+\topmargin=-0.7in
+\textwidth=10.8in
+\textheight=7.9in
+
+\pagestyle{empty}
+
+\begin{document}
+\begin{texshade}{/var/folders/8x/pm9c85791d70g82mlbcpkckd3ptj5j/T//RtmpPKhyPv/seq5bdb64ecefb9.fasta}
+\seqtype{N}
+\shadingmode{identical}
+\threshold{50}
+\showconsensus[ColdHot]{bottom}
+\shadingcolors{blues}
+\showsequencelogo[chemical]{top}
+\hidelogoscale
+\shownames{left}
+\nameseq{1}{ringtailed lemur}
+\nameseq{2}{howler monkey}
+\nameseq{3}{rhesus monkey}
+\nameseq{4}{gibbon}
+\nameseq{5}{gorilla}
+\nameseq{6}{humans}
+\nameseq{7}{chimpanzee}
+\shownumbering{right}
+\showlegend
+\end{texshade}
+\end{document}

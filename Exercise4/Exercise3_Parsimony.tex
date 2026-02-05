@@ -1,0 +1,231 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={parsimony},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{parsimony}
+\author{}
+\date{\vspace{-2.5em}2026-02-03}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(phangorn)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: ape
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{primate }\OtherTok{\textless{}{-}} \FunctionTok{read.delim}\NormalTok{(}\StringTok{"exampleData.txt"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{primate}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##           species char1 char2 char3 char4 char5 char6 char7 char8 char9 char10
+## 1      chimpanzee     1     1     1     2     2     2     2     3     1      1
+## 2   howler_monkey     0     1     0     3     1     3     2     2     2      2
+## 3   rhesus_monkey     1     1     1     2     2     2     2     1     1      1
+## 4         gorilla     1     1     1     2     3     3     3     3     1      1
+## 5 ring_tail_lemur     0     1     0     2     1     1     1     1     2      2
+## 6          gibbon     0     1     1     1     2     1     1     2     1      1
+## 7           human     0     0     0     3     3     2     3     3     1      1
+##   char11 char12 char13 char14 char15
+## 1      1      1      2      2      2
+## 2      1      1      1      2      2
+## 3      1      1      2      3      3
+## 4      1      1      3      1      3
+## 5      0      1      1      1      1
+## 6      0      0      2      3      1
+## 7      0      0      3      2      2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{primate\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(primate[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{11}\NormalTok{], }\AttributeTok{row.names =}\NormalTok{ primate[,}\DecValTok{1}\NormalTok{])}
+\NormalTok{primate.mat }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(primate\_df)}
+\NormalTok{levels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"1"}\NormalTok{, }\StringTok{"2"}\NormalTok{, }\StringTok{"3"}\NormalTok{)}
+\NormalTok{primate.phy }\OtherTok{\textless{}{-}} \FunctionTok{phyDat}\NormalTok{(primate.mat, }\AttributeTok{type =} \StringTok{"USER"}\NormalTok{, }\AttributeTok{levels =}\NormalTok{ levels)}
+\NormalTok{primate.phy}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 7 sequences with 10 character and 9 different site patterns.
+## The states are 0 1 2 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dm }\OtherTok{\textless{}{-}} \FunctionTok{dist.hamming}\NormalTok{(primate.phy)}
+\NormalTok{treeUPGMA }\OtherTok{\textless{}{-}} \FunctionTok{upgma}\NormalTok{(dm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tree\_parsimony }\OtherTok{\textless{}{-}} \FunctionTok{optim.parsimony}\NormalTok{(treeUPGMA, primate.phy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Final p-score 21 after  1 nni operations
+\end{verbatim}
+
+\textbf{Question 1}: It runs very quickly (\textless{} 1 second).
+Returns a p-score of 21 after 1 nni operation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot.phylo}\NormalTok{(tree\_parsimony)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{3_parsimony_files/figure-latex/unnamed-chunk-7-1.pdf}}
+
+\textbf{Question 3}: The root taxon has three branches (it is not
+properly bifurcated).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tree\_parsimony }\OtherTok{\textless{}{-}} \FunctionTok{root}\NormalTok{(tree\_parsimony, }
+                       \AttributeTok{outgroup =} \StringTok{"ring\_tail\_lemur"}\NormalTok{, }
+                       \AttributeTok{resolve.root =} \ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{plot.phylo}\NormalTok{(tree\_parsimony)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{3_parsimony_files/figure-latex/unnamed-chunk-8-1.pdf}}
+
+\textbf{Question 5}: Rhesus monkey + chimpanzee + gorilla form a
+monophletic clade. All the organisms in this group have:
+
+\begin{itemize}
+\tightlist
+\item
+  a protruding jaw, enlongated canines, a prominent orbital ridge/crest,
+  a bony step-off at the back of the skull
+\item
+  a similar number of cranial vein holes in their skull
+\item
+  orbital diameter
+\item
+  number of teeth and pointy molars
+\end{itemize}
+
+Among these traits, the ones that are not shared by other organisms
+(suggesting a synaptomorphy) include the protruding jaw.
+
+\end{document}

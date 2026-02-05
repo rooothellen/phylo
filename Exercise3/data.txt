@@ -1,0 +1,8 @@
+species	char1	char2	char3	char4	char5	char6	char7	char8	char9	char10	char11	char12	char13	char14	char15
+chimpanzee	1	1	1	2	2	2	2	3	1	1	1	1	2	2	2
+howler_monkey	0	1	0	3	1	3	2	2	2	2	1	1	1	2	2
+rhesus_monkey	1	1	1	2	2	2	2	1	1	1	1	1	2	3	3
+gorilla	1	1	1	2	3	3	3	3	1	1	1	1	3	1	3
+ring_tail_lemur	0	1	0	2	1	1	1	1	2	2	0	1	1	1	1
+gibbon	0	1	1	1	2	1	1	2	1	1	0	0	2	3	1
+human	0	0	0	3	3	2	3	3	1	1	0	0	3	2	2
