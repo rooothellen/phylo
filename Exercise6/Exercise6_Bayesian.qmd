@@ -1,0 +1,95 @@
+---
+title: "Bayesian-Like Code"
+format: pdf
+---
+
+```{r setup}
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+```
+
+```{r}
+source("BayesianLikeCode.R")
+```
+
+## Part 1
+
+```{r}
+theta.vals <- c(0, .1, .2, .3, .4, .5, .6, 0.667, .7, .8, .9, 1)
+
+theta.prior.distr.df <- get_prior_distr(theta.vals)
+print(theta.prior.distr.df)
+```
+
+**Question 1**: $\theta = 0.5$ has the highest prior probability- $P(\theta = 0.5) = 0.176$. This suggests that the coin is fair- if we were to flip the coin many times, the probability of it landing on heads would converge to 0.5.
+
+```{r}
+plot_prior_distr(theta.prior.distr.df)
+```
+
+```{r}
+likelihood.df <- get_likelihood_df(theta.vals, num.heads=2, num.tails=1)
+print(likelihood.df)
+```
+
+**Question 2**: $\theta = 0.667$ has the highest likelihood. This suggests that the coin is biased- if we were to flip the coin many times, the probability of it landing on heads would converge to 0.667. 
+
+```{r}
+plot_likelihood_prob_distr(likelihood.df)
+```
+
+```{r}
+posterior.df <- get_posterior_df(likelihood.df, theta.prior.distr.df)
+print(posterior.df)
+```
+
+**Question 3**: $\theta = 0.5$ has the highest posterior probability. This indicates that the coin is fair, we just experienced an extreme fluctuation in likelihood due to our small sample size ($n=3$). 
+
+```{r}
+plot_grid(plot_prior_distr(theta.prior.distr.df), 
+          
+          plot_likelihood_prob_distr(likelihood.df) + 
+            labs(subtitle = "2 Heads with 3 Coin Tosses"), 
+          
+          plot_posterior_prob_distr(posterior.df, theta.vals) + 
+            labs(subtitle = "2 Heads with 3 Coin Tosses"), nrow = 3, align = "v")
+```
+
+## Part 2
+
+```{r}
+likelihood.df <- get_likelihood_df(theta.vals, 
+                                   num.heads = 8, 
+                                   num.tails = 12)
+posterior.df <- get_posterior_df(likelihood.df, theta.prior.distr.df)
+
+print(posterior.df)
+```
+
+**Question 4**: $\theta = 0.4$ has the highest posterior probability. This suggests the coin is slightly biased towards tails. 
+
+## Part 3
+
+```{r}
+theta.vals <- seq(0, 1, 0.001)
+theta.prior.distr.df <- get_prior_distr(theta.vals)
+```
+
+```{r}
+likelihood.df <- get_likelihood_df(theta.vals, 
+                                   num.heads = 750,
+                                   num.tails = 250)
+posterior.df <- get_posterior_df(likelihood.df, theta.prior.distr.df)
+```
+
+
+```{r}
+plot_posterior_prob_distr(posterior.df, theta.vals)
+```
+
+**Question 5**: $\theta = 0.75$ has the highest posterior probability. This indicates that the coin is heavily biased towards heads. 
+
+**Question 6**: The prior is most effective when you have a large, true/fair sample. As $n$ increases, $\theta$ will converge towards its "true" value, and biases caused by random fluctuations in the number of heads will be eliminated. 
+
+
