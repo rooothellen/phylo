@@ -1,0 +1,152 @@
+---
+title: "Exercise 7: Markov Chains"
+format: pdf
+author: Ruth Walters
+---
+
+
+```{r}
+library(Matrix)
+```
+
+## Part 1
+
+```{r}
+Q <- matrix(0,2,2)
+Q
+```
+
+```{r}
+Q[1,2] <- 5
+Q
+```
+
+```{r}
+today <- c(1,0)
+names(today) <- c("Sunny", "Rainy")
+
+rates <- c(0, 0.7635756, 
+           0.1527151, 0)
+
+Q <- matrix(rates, 2, 2)
+
+Q
+```
+
+```{r}
+rownames(Q) <- colnames(Q) <- c("Sunny", "Rainy")
+
+diag(Q) <- -rowSums(Q)
+
+Q
+```
+
+**Question 1**: 
+
+$r_{\text{sunny} \to \text{rainy}} = 0.1527151$
+
+$r_{\text{rainy} \to \text{sunny}} = 0.7635756$
+
+## Part 2
+
+```{r}
+time <- 1
+
+P_t <- expm(t(Q)*time) %*% today
+
+P_t
+```
+
+**Question 3**: $P(\text{sunny} \mid t =1) = 0.90000001$
+
+```{r}
+time <- 2
+
+P_t <- expm(t(Q)*time) %*% today
+
+P_t
+```
+
+**Question 4**: $P(\text{rain} \mid t = 2) = 0.14$
+
+```{r}
+times <- c(10,100,1000)
+
+
+for (i in times) {
+  P_t <- expm(t(Q)*i) %*% today
+  
+  print(paste("t =", i))
+  print(P_t)
+}
+```
+
+**Question 5**: In the long run, the probability of having a sunny day stabilizes to ~0.83, meaning that we expect to have a sunny day ~83% of the time, or we expect 83% of days to be sunny. 
+
+## Part 3
+
+```{r}
+nucleotides <- c("A", "C", "G", "T")
+```
+
+
+```{r}
+rates <- c(0,
+           0.2,
+           0.4,
+           0.2,
+           0.3,
+           0,
+           0.3,
+           0.9,
+           0.6,
+           0.3,
+           0,
+           0.3,
+           0.2,
+           0.6,
+           0.2,
+           0)
+
+Q <- matrix(rates, 4, 4)
+
+diag(Q) <- -rowSums(Q)
+
+rownames(Q) <- colnames(Q) <- nucleotides
+
+Q
+```
+
+```{r}
+Jer.obs <- c(1, 0, 0, 0)
+
+names(Jer.obs) <- nucleotides
+
+Jer.DNA <- expm(Q*0.3) %*% Jer.obs
+
+Jer.DNA
+```
+
+```{r}
+Keyrock.obs <- c(0, 1, 0, 0)
+
+names(Keyrock.obs) <- nucleotides
+
+Keyrock.DNA <- expm(Q*0.3) %*% Keyrock.obs
+
+Keyrock.DNA
+```
+
+```{r}
+combined.probs <- Jer.DNA * Keyrock.DNA
+
+combined.probs
+```
+
+```{r}
+sum(combined.probs)
+```
+
+**Question 6**: The overall probability is 0.1125112. 
+
+**Question 7**: The likeliest nucleotide state is an A, which means that your brother is the mutant, not you.
