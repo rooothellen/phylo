@@ -1,0 +1,101 @@
+---
+title: "Exercise8_SequenceDifference"
+format: html
+author: Ruth Walters
+date: 02-17-2026
+---
+
+```{r}
+library(ape)
+library(phangorn)
+```
+
+```{r}
+ref <- c("U15717",
+         "U15718",
+         "U15719",
+         "U15720",
+         "U15721",
+         "U15722",
+         "U15723",
+         "U15724")
+```
+
+```{r}
+rampho_dna <- read.GenBank(ref)
+rampho_dna
+```
+
+```{r}
+raw <- dist.dna(rampho_dna,
+                model = "raw", 
+                pairwise.deletion = TRUE)
+
+raw
+```
+**Question 1**: The `dist.dna` function creates a matrix of pairwise distances between DNA sequences using a model of DNA evolution. So, the values represent the probability of one of the DNA sequences mutating into the other DNA sequence. The smaller the value, the higher the distance between sequences and the lower the probability that one becomes the other.
+
+```{r}
+markov <- dist.dna(rampho_dna,
+                   model = "JC69", 
+                   pairwise.deletion = TRUE)
+
+plot(raw~markov, 
+     pch = 20, 
+     col = "red", 
+     xlim = c(0,.1), 
+     ylim = c(0, .1),
+     xlab = "JC69 model distance",
+     ylab = "Uncorrected distance", 
+     main = "Saturation plot")
+abline(0, 1, lty = 2)
+```
+
+**Question 2**: No; the data displayed does not significantly deviate from the line. 
+
+**Question 3**: Parsimony is prone to failure when the genes under study are approaching/have reached saturation. Under a parsimonious model, shared nucleotides are *always* reflective of inheritance. However, for more distantly related organisms, shared nucleotides might be the result of chance. This means that parsimony explains more closely related/nearer relationships in the tree better than more distant relations in the tree. 
+
+```{r}
+primates.dna <- read.dna("~/Documents/phylo/Exercise5/data/primates.raw.aligned.fasta",
+                         format = "fasta")
+primates.dna
+```
+
+```{r}
+raw <- dist.dna(primates.dna, 
+                model = "raw", 
+                pairwise.deletion = TRUE)
+
+markov <- dist.dna(primates.dna, 
+                   model = "JC69", 
+                   pairwise.deletion = TRUE)
+
+plot(raw~markov, 
+     pch = 20, 
+     col = "red", 
+     xlim = c(0,.4), 
+     ylim = c(0, .4),
+     xlab = "JC69 model distance",
+     ylab = "Uncorrected distance", 
+     main = "Saturation plot")
+abline(0, 1, lty = 2)
+```
+
+```{r}
+primates.phyDat <- phyDat(primates.dna, 
+                          type = "DNA", 
+                          levels = NULL)
+
+dm <- dist.dna(primates.dna, 
+               model = "JC69")
+
+treeUPGMA <- upgma(dm)
+
+plot(treeUPGMA, 
+     "unrooted", 
+     main = "JC69 corrected")
+```
+
+**Question 5**: The branches that separate ring-tailed lemurs and howler monkeys are long relative to some of the other branches in the tree.  
+
+**Question 6**: Given that the sequence for the primates DNA is saturated or approaching saturation, I suspect that a parsimonious approach would have the branches between these two organisms shorter. This reflects parsimony's tendency to view shared nucleotides as inherited nucleotides. I would not reccomend the use of parsimony in this instance. 
