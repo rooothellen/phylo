@@ -1,0 +1,82 @@
+---
+title: "Exercise 12: Bootstrapping and Tree Support"
+author: "Ruth Walters"
+format: html
+page-layout: full
+---
+
+```{r}
+library(phangorn)
+source("~/Documents/phylo/Exercise10/reRoot.R")
+```
+
+```{r}
+primates.dna <- read.dna("~/Documents/phylo/Exercise5/data/primates.raw.aligned.fasta",
+                         format = "fasta")
+
+primates.dna
+```
+
+```{r}
+primates.phyDat <- phyDat(primates.dna, 
+                          type = "DNA", 
+                          levels = NULL)
+
+primates.phyDat
+```
+
+```{r}
+mt <- modelTest(primates.phyDat, 
+                model = "all")
+
+mt
+```
+
+```{r}
+best.model <- mt[which.min(mt$AIC),]
+
+best.model
+```
+
+**Question 1**: Yes
+
+```{r}
+env <- attr(mt, "env")
+
+best.fit <- eval(
+  get(
+    as.character(
+      best.model[1]), 
+    env), 
+  env)
+
+best.fit
+```
+
+```{r}
+rooted.tree <- reroot.tree(best.fit$tree, 
+                           "ringtailed_lemur")
+
+plot(rooted.tree)
+```
+
+```{r}
+bs <- bootstrap.pml(best.fit,
+                    bs = 100, 
+                    optNni = TRUE,
+                    contro = pml.control(trace = 0))
+```
+
+```{r}
+plotBS(rooted.tree, 
+       bs, 
+       p = 0.50, 
+       type = "p")
+```
+
+**Question 3**: The best supported relationship (0.98) is at the node separating (humans + chimpanzees) and gorillas. The rest of the nodes have moderate but not "good" support (more than 0.60 but lower than 0.70).
+
+**Question 4**: There is some evidence that humans and chimps are sister, but the relationship still does not meet the threshold for being considered "well-supported"
+
+**Question 5**: Everyone has a different threshold for what they'll consider "support", and how that translates into an actionable conclusion. While the relationship between humans and chimps doesn't quite meet the 0.70 bar, it *is* close enough for me to say "probably". 
+ 

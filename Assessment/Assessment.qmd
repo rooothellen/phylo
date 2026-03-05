@@ -1,0 +1,82 @@
+---
+title: "Assessment"
+format: pdf
+editor: visual
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(phangorn)
+library(msa)
+source("assessRoot.R")
+```
+
+```{r}
+viral_dna <- read.dna("RidgeFever_23GENOMES.fasta",
+                      format = "fasta")
+
+viral_dna
+```
+
+```{r}
+viral_phy <- phyDat(viral_dna, 
+                    type = "DNA", 
+                    levels = NULL)
+
+viral_phy
+```
+
+```{r}
+mt <- modelTest(viral_phy, 
+                model = "all")
+
+best.model <- mt[which.min(mt$AIC),]
+
+best.model
+```
+
+```{r}
+env <- attr(mt, "env")
+
+best.fit <- eval(
+  get(
+    as.character(
+      best.model[1]), 
+    env), 
+  env)
+
+best.fit
+```
+
+```{r}
+#| fig-height: 12
+#| fig-width: 18
+rooted.tree <- reroot.tree(best.fit$tree)
+
+plot(rooted.tree)
+```
+
+```{r}
+bs <- bootstrap.pml(best.fit,
+                    bs = 100, 
+                    optNni = TRUE,
+                    contro = pml.control(trace = 0))
+```
+
+**Question 1**: See plot:
+
+```{r}
+#| fig-height: 18
+#| fig-width: 12
+plotBS(rooted.tree, 
+       bs, 
+       p = 0.50, 
+       type = "p",
+       align.tip.label = TRUE, 
+       bs.adj = 1.5)
+```
+
+**Question 2**: The Human RFV genomes form a clade that is sister to the Bat Ridge-Like virus, which shares a recent common ancestor with the Raccoon Ridge Virus and the Fox Ridge Virus. This close relationship with animal viruses suggests that the *wildlife spillover hypothesis* is the most correct.
+
+**Question 3**: The support for this tree is generally very high, and the bootstrap value for the Human RFV branch meets the standard for evidence (0.73 \> 0.70). This suggests that the relationships are supported by genetic data.

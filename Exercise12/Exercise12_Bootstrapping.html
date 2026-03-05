@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ruth Walters">
+
+<title>Exercise 12: Bootstrapping and Tree Support</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Exercise12_Bootstrapping_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/popper.min.js"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Exercise12_Bootstrapping_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Exercise12_Bootstrapping_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Exercise12_Bootstrapping_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Exercise12_Bootstrapping_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Exercise12_Bootstrapping_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Exercise12_Bootstrapping_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+
+<main class="content column-page" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exercise 12: Bootstrapping and Tree Support</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ruth Walters </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(phangorn)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ape</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"~/Documents/phylo/Exercise10/reRoot.R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>primates.dna <span class="ot">&lt;-</span> <span class="fu">read.dna</span>(<span class="st">"~/Documents/phylo/Exercise5/data/primates.raw.aligned.fasta"</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">format =</span> <span class="st">"fasta"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>primates.dna</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>7 DNA sequences in binary format stored in a matrix.
+
+All sequences of same length: 1046 
+
+Labels:
+ringtailed_lemur
+howler_monkey
+rhesus_monkey
+gibbon
+gorilla
+humans
+...
+
+Base composition:
+    a     c     g     t 
+0.329 0.321 0.088 0.261 
+(Total: 7.32 kb)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>primates.phyDat <span class="ot">&lt;-</span> <span class="fu">phyDat</span>(primates.dna, </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">type =</span> <span class="st">"DNA"</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">levels =</span> <span class="cn">NULL</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>primates.phyDat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>7 sequences with 1046 character and 301 different site patterns.
+The states are a c g t </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mt <span class="ot">&lt;-</span> <span class="fu">modelTest</span>(primates.phyDat, </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">model =</span> <span class="st">"all"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Model        df  logLik   AIC      BIC
+          JC 11 -5496.181 11014.36 11068.84 
+        JC+I 12 -5416.754 10857.51 10916.94 
+     JC+G(4) 12 -5418.998 10862 10921.43 
+   JC+G(4)+I 13 -5416.886 10859.77 10924.16 
+         F81 14 -5328.829 10685.66 10755 
+       F81+I 15 -5226.856 10483.71 10558 
+    F81+G(4) 15 -5226.356 10482.71 10557 
+  F81+G(4)+I 16 -5224.896 10481.79 10561.03 
+         K80 12 -5323.311 10670.62 10730.05 
+       K80+I 13 -5221.048 10468.1 10532.48 
+    K80+G(4) 13 -5213.058 10452.12 10516.5 
+  K80+G(4)+I 14 -5212.604 10453.21 10522.55 
+         HKY 15 -5120.99 10271.98 10346.27 
+       HKY+I 16 -4960.509 9953.017 10032.26 
+    HKY+G(4) 16 -4948.607 9929.213 10008.46 
+  HKY+G(4)+I 17 -4944.322 9922.645 10006.84 
+        TrNe 13 -5281.564 10589.13 10653.51 
+      TrNe+I 14 -5176.895 10381.79 10451.13 
+   TrNe+G(4) 14 -5174.584 10377.17 10446.51 
+ TrNe+G(4)+I 15 -5171.055 10372.11 10446.4 
+         TrN 16 -5120.97 10273.94 10353.18 
+       TrN+I 17 -4958.208 9950.416 10034.61 
+    TrN+G(4) 17 -4946.994 9927.988 10012.18 
+  TrN+G(4)+I 18 -4941.606 9919.213 10008.36 
+        TPM1 13 -5305.454 10636.91 10701.29 
+      TPM1+I 14 -5202.961 10433.92 10503.26 
+   TPM1+G(4) 14 -5201.154 10430.31 10499.65 
+ TPM1+G(4)+I 15 -5199.12 10428.24 10502.53 
+         K81 13 -5305.454 10636.91 10701.29 
+       K81+I 14 -5202.961 10433.92 10503.26 
+    K81+G(4) 14 -5201.154 10430.31 10499.65 
+  K81+G(4)+I 15 -5199.12 10428.24 10502.53 
+       TPM1u 16 -5111.142 10254.28 10333.53 
+     TPM1u+I 17 -4957.487 9948.975 10033.17 
+  TPM1u+G(4) 17 -4946.533 9927.066 10011.26 
+TPM1u+G(4)+I 18 -4942.271 9920.541 10009.69 
+        TPM2 13 -5253.008 10532.02 10596.4 
+      TPM2+I 14 -5158.249 10344.5 10413.84 
+   TPM2+G(4) 14 -5149.615 10327.23 10396.57 
+ TPM2+G(4)+I 15 -5149.462 10328.92 10403.22 
+       TPM2u 16 -5108.28 10248.56 10327.8 
+     TPM2u+I 17 -4957.313 9948.627 10032.82 
+  TPM2u+G(4) 17 -4947.223 9928.446 10012.64 
+TPM2u+G(4)+I 18 -4943.086 9922.171 10011.32 
+        TPM3 13 -5307.027 10640.05 10704.44 
+      TPM3+I 14 -5213.573 10455.15 10524.48 
+   TPM3+G(4) 14 -5207.854 10443.71 10513.05 
+ TPM3+G(4)+I 15 -5207.071 10444.14 10518.43 
+       TPM3u 16 -5108.236 10248.47 10327.72 
+     TPM3u+I 17 -4957.39 9948.781 10032.98 
+  TPM3u+G(4) 17 -4946.96 9927.919 10012.12 
+TPM3u+G(4)+I 18 -4942.67 9921.339 10010.49 
+       TIM1e 14 -5263.716 10555.43 10624.77 
+     TIM1e+I 15 -5159.405 10348.81 10423.1 
+  TIM1e+G(4) 15 -5161.171 10352.34 10426.63 
+TIM1e+G(4)+I 16 -5155.659 10343.32 10422.56 
+        TIM1 17 -5111.129 10256.26 10340.45 
+      TIM1+I 18 -4955.042 9946.083 10035.23 
+   TIM1+G(4) 18 -4944.999 9925.998 10015.15 
+ TIM1+G(4)+I 19 -4939.588 9917.176 10011.28 
+       TIM2e 14 -5210.005 10448.01 10517.35 
+     TIM2e+I 15 -5111.451 10252.9 10327.19 
+  TIM2e+G(4) 15 -5111.075 10252.15 10326.44 
+TIM2e+G(4)+I 16 -5107.542 10247.08 10326.33 
+        TIM2 17 -5108.272 10250.54 10334.74 
+      TIM2+I 18 -4955.381 9946.762 10035.91 
+   TIM2+G(4) 18 -4946.182 9928.363 10017.51 
+ TIM2+G(4)+I 19 -4941.1 9920.2 10014.3 
+       TIM3e 14 -5265.263 10558.53 10627.87 
+     TIM3e+I 15 -5171.034 10372.07 10446.36 
+  TIM3e+G(4) 15 -5168.717 10367.43 10441.72 
+TIM3e+G(4)+I 16 -5165.449 10362.9 10442.14 
+        TIM3 17 -5108.207 10250.41 10334.61 
+      TIM3+I 18 -4954.794 9945.589 10034.74 
+   TIM3+G(4) 18 -4945.324 9926.648 10015.8 
+ TIM3+G(4)+I 19 -4939.859 9917.717 10011.82 
+        TVMe 15 -5234.642 10499.28 10573.57 
+      TVMe+I 16 -5146.501 10325 10404.25 
+   TVMe+G(4) 16 -5141.583 10315.17 10394.41 
+ TVMe+G(4)+I 17 -5140.758 10315.52 10399.71 
+         TVM 18 -5095.533 10227.07 10316.21 
+       TVM+I 19 -4953.952 9945.904 10040.01 
+    TVM+G(4) 19 -4945.188 9928.376 10022.48 
+  TVM+G(4)+I 20 -4941.096 9922.192 10021.25 
+         SYM 16 -5191.59 10415.18 10494.42 
+       SYM+I 17 -5101.912 10237.82 10322.02 
+    SYM+G(4) 17 -5102.729 10239.46 10323.65 
+  SYM+G(4)+I 18 -5098.762 10233.52 10322.67 
+         GTR 19 -5095.519 10229.04 10323.14 
+       GTR+I 20 -4951.752 9943.503 10042.56 
+    GTR+G(4) 20 -4944.143 9928.285 10027.34 
+  GTR+G(4)+I 21 -4939.047 9920.094 10024.1 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Model df    logLik       AIC          AICw      AICc         AICcw
+1            JC 11 -5496.181 11014.362 1.769423e-239 11014.618 2.244888e-239
+2          JC+I 12 -5416.754 10857.509 2.033317e-205 10857.811 2.520138e-205
+3       JC+G(4) 12 -5418.998 10861.995 2.157443e-206 10862.297 2.673982e-206
+4     JC+G(4)+I 13 -5416.886 10859.772 6.558245e-206 10860.124 7.925045e-206
+5           F81 14 -5328.829 10685.659 4.216048e-168 10686.066 4.957363e-168
+6         F81+I 15 -5226.856 10483.712 2.999329e-124 10484.178 3.424791e-124
+7      F81+G(4) 15 -5226.356 10482.711 4.948038e-124 10483.177 5.649929e-124
+8    F81+G(4)+I 16 -5224.896 10481.791 7.837538e-124 10482.320 8.673323e-124
+9           K80 12 -5323.311 10670.622 7.765336e-165 10670.924 9.624527e-165
+10        K80+I 13 -5221.048 10468.097 7.377200e-121 10468.449 8.914678e-121
+11     K80+G(4) 13 -5213.058 10452.115 2.178605e-117 10452.468 2.632646e-117
+12   K80+G(4)+I 14 -5212.604 10453.207 1.262179e-117 10453.615 1.484111e-117
+13          HKY 15 -5120.990 10271.980  2.845369e-78 10272.446  3.248991e-78
+14        HKY+I 16 -4960.509  9953.017  5.199442e-09  9953.546  5.753904e-09
+15     HKY+G(4) 16 -4948.607  9929.213  7.673077e-04  9929.742  8.491324e-04
+16   HKY+G(4)+I 17 -4944.322  9922.645  2.047628e-02  9923.240  2.191702e-02
+17         TrNe 13 -5281.564 10589.128 3.858121e-147 10589.480 4.662190e-147
+18       TrNe+I 14 -5176.895 10381.791 4.064253e-102 10382.198 4.778878e-102
+19    TrNe+G(4) 14 -5174.584 10377.167 4.102095e-101 10377.575 4.823373e-101
+20  TrNe+G(4)+I 15 -5171.055 10372.111 5.140585e-100 10372.577 5.869789e-100
+21          TrN 16 -5120.970 10273.940  1.067833e-78 10274.469  1.181705e-78
+22        TrN+I 17 -4958.208  9950.416  1.908813e-08  9951.012  2.043119e-08
+23     TrN+G(4) 17 -4946.994  9927.988  1.415978e-03  9928.583  1.515608e-03
+24   TrN+G(4)+I 18 -4941.606  9919.213  1.139107e-01  9919.879  1.176916e-01
+25         TPM1 13 -5305.454 10636.908 1.625758e-157 10637.260 1.964581e-157
+26       TPM1+I 14 -5202.961 10433.921 1.945251e-113 10434.329 2.287288e-113
+27    TPM1+G(4) 14 -5201.154 10430.307 1.185018e-112 10430.715 1.393382e-112
+28  TPM1+G(4)+I 15 -5199.120 10428.239 3.332746e-112 10428.705 3.805504e-112
+29          K81 13 -5305.454 10636.908 1.625758e-157 10637.260 1.964581e-157
+30        K81+I 14 -5202.961 10433.921 1.945251e-113 10434.329 2.287288e-113
+31     K81+G(4) 14 -5201.154 10430.307 1.185018e-112 10430.715 1.393382e-112
+32   K81+G(4)+I 15 -5199.120 10428.239 3.332746e-112 10428.705 3.805504e-112
+33        TPM1u 16 -5111.142 10254.284  1.980326e-74 10254.813  2.191505e-74
+34      TPM1u+I 17 -4957.487  9948.975  3.924192e-08  9949.570  4.200303e-08
+35   TPM1u+G(4) 17 -4946.533  9927.066  2.244957e-03  9927.661  2.402915e-03
+36 TPM1u+G(4)+I 18 -4942.271  9920.541  5.861756e-02  9921.207  6.056318e-02
+37         TPM2 13 -5253.008 10532.015 9.731682e-135 10532.368 1.175986e-134
+38       TPM2+I 14 -5158.249 10344.499  5.091405e-94 10344.906  5.986636e-94
+39    TPM2+G(4) 14 -5149.615 10327.229  2.863532e-90 10327.637  3.367032e-90
+40  TPM2+G(4)+I 15 -5149.462 10328.924  1.226956e-90 10329.390  1.401003e-90
+41        TPM2u 16 -5108.280 10248.561  3.463771e-73 10249.089  3.833143e-73
+42      TPM2u+I 17 -4957.313  9948.627  4.671078e-08  9949.222  4.999741e-08
+43   TPM2u+G(4) 17 -4947.223  9928.446  1.126026e-03  9929.041  1.205255e-03
+44 TPM2u+G(4)+I 18 -4943.086  9922.171  2.594738e-02  9922.837  2.680862e-02
+45         TPM3 13 -5307.027 10640.054 3.371316e-158 10640.407 4.073930e-158
+46       TPM3+I 14 -5213.573 10455.145 4.789534e-118 10455.553 5.631687e-118
+47    TPM3+G(4) 14 -5207.854 10443.707 1.458984e-115 10444.114 1.715520e-115
+48  TPM3+G(4)+I 15 -5207.071 10444.141 1.174200e-115 10444.607 1.340763e-115
+49        TPM3u 16 -5108.236 10248.473  3.619347e-73 10249.001  4.005309e-73
+50      TPM3u+I 17 -4957.390  9948.781  4.323914e-08  9949.376  4.628150e-08
+51   TPM3u+G(4) 17 -4946.960  9927.919  1.465231e-03  9928.515  1.568327e-03
+52 TPM3u+G(4)+I 18 -4942.670  9921.339  3.933079e-02  9922.005  4.063625e-02
+53        TIM1e 14 -5263.716 10555.432 8.003510e-140 10555.839 9.410782e-140
+54      TIM1e+I 15 -5159.405 10348.810  5.898529e-95 10349.276  6.735249e-95
+55   TIM1e+G(4) 15 -5161.171 10352.343  1.008203e-95 10352.809  1.151219e-95
+56 TIM1e+G(4)+I 16 -5155.659 10343.318  9.189236e-94 10343.847  1.016916e-93
+57         TIM1 17 -5111.129 10256.258  7.382082e-75 10256.853  7.901494e-75
+58       TIM1+I 18 -4955.042  9946.083  1.666179e-07  9946.749  1.721482e-07
+59    TIM1+G(4) 18 -4944.999  9925.998  3.830054e-03  9926.664  3.957181e-03
+60  TIM1+G(4)+I 19 -4939.588  9917.176  3.154297e-01  9917.916  3.139479e-01
+61        TIM2e 14 -5210.005 10448.010 1.697286e-116 10448.417 1.995723e-116
+62      TIM2e+I 15 -5111.451 10252.903  3.950473e-74 10253.369  4.510857e-74
+63   TIM2e+G(4) 15 -5111.075 10252.150  5.756567e-74 10252.616  6.573150e-74
+64 TIM2e+G(4)+I 16 -5107.542 10247.085  7.245114e-73 10247.613  8.017723e-73
+65         TIM2 17 -5108.272 10250.545  1.284499e-73 10251.140  1.374878e-73
+66       TIM2+I 18 -4955.381  9946.762  1.186760e-07  9947.428  1.226151e-07
+67    TIM2+G(4) 18 -4946.182  9928.363  1.173603e-03  9929.029  1.212557e-03
+68  TIM2+G(4)+I 19 -4941.100  9920.200  6.952996e-02  9920.941  6.920333e-02
+69        TIM3e 14 -5265.263 10558.527 1.702999e-140 10558.934 2.002441e-140
+70      TIM3e+I 15 -5171.034 10372.068 5.252163e-100 10372.534 5.997195e-100
+71   TIM3e+G(4) 15 -5168.717 10367.433  5.329334e-99 10367.899  6.085313e-99
+72 TIM3e+G(4)+I 16 -5165.449 10362.898  5.147550e-98 10363.426  5.696479e-98
+73         TIM3 17 -5108.207 10250.414  1.370924e-73 10251.010  1.467384e-73
+74       TIM3+I 18 -4954.794  9945.589  2.133428e-07  9946.255  2.204240e-07
+75    TIM3+G(4) 18 -4945.324  9926.648  2.767137e-03  9927.314  2.858983e-03
+76  TIM3+G(4)+I 19 -4939.859  9917.717  2.405766e-01  9918.458  2.394464e-01
+77         TVMe 15 -5234.642 10499.284 1.246484e-127 10499.750 1.423301e-127
+78       TVMe+I 16 -5146.501 10325.003  8.716707e-90 10325.531  9.646246e-90
+79    TVMe+G(4) 16 -5141.583 10315.167  1.191745e-87 10315.696  1.318831e-87
+80  TVMe+G(4)+I 17 -5140.758 10315.516  1.001112e-87 10316.111  1.071552e-87
+81          TVM 18 -5095.533 10227.066  1.611186e-68 10227.732  1.664664e-68
+82        TVM+I 19 -4953.952  9945.904  1.822106e-07  9946.645  1.813547e-07
+83     TVM+G(4) 19 -4945.188  9928.376  1.166339e-03  9929.116  1.160860e-03
+84   TVM+G(4)+I 20 -4941.096  9922.192  2.568308e-02  9923.011  2.457520e-02
+85          SYM 16 -5191.590 10415.181 2.282882e-109 10415.709 2.526326e-109
+86        SYM+I 17 -5101.912 10237.823  7.432442e-71 10238.419  7.955398e-71
+87     SYM+G(4) 17 -5102.729 10239.457  3.283060e-71 10240.053  3.514060e-71
+88   SYM+G(4)+I 18 -5098.762 10233.524  6.378712e-70 10234.190  6.590433e-70
+89          GTR 19 -5095.519 10229.039  6.007780e-69 10229.779  5.979557e-69
+90        GTR+I 20 -4951.752  9943.503  6.052030e-07  9944.323  5.790967e-07
+91     GTR+G(4) 20 -4944.143  9928.285  1.220371e-03  9929.105  1.167729e-03
+92   GTR+G(4)+I 21 -4939.047  9920.094  7.331946e-02  9920.996  6.731047e-02
+        BIC
+1  11068.84
+2  10916.94
+3  10921.43
+4  10924.16
+5  10755.00
+6  10558.00
+7  10557.00
+8  10561.03
+9  10730.05
+10 10532.48
+11 10516.50
+12 10522.55
+13 10346.27
+14 10032.26
+15 10008.46
+16 10006.84
+17 10653.51
+18 10451.13
+19 10446.51
+20 10446.40
+21 10353.18
+22 10034.61
+23 10012.18
+24 10008.36
+25 10701.29
+26 10503.26
+27 10499.65
+28 10502.53
+29 10701.29
+30 10503.26
+31 10499.65
+32 10502.53
+33 10333.53
+34 10033.17
+35 10011.26
+36 10009.69
+37 10596.40
+38 10413.84
+39 10396.57
+40 10403.22
+41 10327.80
+42 10032.82
+43 10012.64
+44 10011.32
+45 10704.44
+46 10524.48
+47 10513.05
+48 10518.43
+49 10327.72
+50 10032.98
+51 10012.12
+52 10010.49
+53 10624.77
+54 10423.10
+55 10426.63
+56 10422.56
+57 10340.45
+58 10035.23
+59 10015.15
+60 10011.28
+61 10517.35
+62 10327.19
+63 10326.44
+64 10326.33
+65 10334.74
+66 10035.91
+67 10017.51
+68 10014.30
+69 10627.87
+70 10446.36
+71 10441.72
+72 10442.14
+73 10334.61
+74 10034.74
+75 10015.80
+76 10011.82
+77 10573.57
+78 10404.25
+79 10394.41
+80 10399.71
+81 10316.21
+82 10040.01
+83 10022.48
+84 10021.25
+85 10494.42
+86 10322.02
+87 10323.65
+88 10322.67
+89 10323.14
+90 10042.56
+91 10027.34
+92 10024.10</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>best.model <span class="ot">&lt;-</span> mt[<span class="fu">which.min</span>(mt<span class="sc">$</span>AIC),]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>best.model</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Model df    logLik      AIC      AICw     AICc     AICcw      BIC
+60 TIM1+G(4)+I 19 -4939.588 9917.176 0.3154297 9917.916 0.3139479 10011.28</code></pre>
+</div>
+</div>
+<p><strong>Question 1</strong>: Yes</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>env <span class="ot">&lt;-</span> <span class="fu">attr</span>(mt, <span class="st">"env"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>best.fit <span class="ot">&lt;-</span> <span class="fu">eval</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">get</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>      best.model[<span class="dv">1</span>]), </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    env), </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  env)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>best.fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>model: TIM1+G(4)+I 
+loglikelihood: -4939.588 
+unconstrained loglikelihood: -4382.048 
+Proportion of invariant sites: 0.3457489 
+Model of rate heterogeneity: Discrete gamma model
+Number of rate categories: 4 
+Shape parameter: 1.249785 
+       Rate Proportion
+1 0.0000000  0.3457489
+2 0.2811752  0.1635628
+3 0.8266159  0.1635628
+4 1.5767521  0.1635628
+5 3.4293174  0.1635628
+
+Rate matrix:
+           a         c          g         t
+a  0.0000000 1.0000000 11.2804398 0.4293576
+c  1.0000000 0.0000000  0.4293576 7.0575315
+g 11.2804398 0.4293576  0.0000000 1.0000000
+t  0.4293576 7.0575315  1.0000000 0.0000000
+
+Base frequencies:  
+         a          c          g          t 
+0.32944886 0.32122292 0.08829175 0.26103647 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rooted.tree <span class="ot">&lt;-</span> <span class="fu">reroot.tree</span>(best.fit<span class="sc">$</span>tree, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"ringtailed_lemur"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rooted.tree)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Exercise12_Bootstrapping_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bs <span class="ot">&lt;-</span> <span class="fu">bootstrap.pml</span>(best.fit,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">bs =</span> <span class="dv">100</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">optNni =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">contro =</span> <span class="fu">pml.control</span>(<span class="at">trace =</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotBS</span>(rooted.tree, </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>       bs, </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">p =</span> <span class="fl">0.50</span>, </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">type =</span> <span class="st">"p"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Exercise12_Bootstrapping_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Question 3</strong>: The best supported relationship (0.98) is at the node separating (humans + chimpanzees) and gorillas. The rest of the nodes have moderate but not “good” support (more than 0.60 but lower than 0.70).</p>
+<p><strong>Question 4</strong>: There is some evidence that humans and chimps are sister, but the relationship still does not meet the threshold for being considered “well-supported”</p>
+<p><strong>Question 5</strong>: Everyone has a different threshold for what they’ll consider “support”, and how that translates into an actionable conclusion. While the relationship between humans and chimps doesn’t quite meet the 0.70 bar, it <em>is</em> close enough for me to say “probably”.</p>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

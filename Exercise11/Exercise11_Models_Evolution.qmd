@@ -1,0 +1,133 @@
+---
+title: "Exercise 11: Models Selection"
+format: html
+author: Ruth Walters
+page-layout: full
+---
+
+```{r}
+library(phangorn)
+source("~/Documents/phylo/Exercise10/reRoot.R")
+```
+
+```{r}
+primates.dna <- read.dna("~/Documents/phylo/Exercise5/data/primates.raw.aligned.fasta",
+                         format="fasta") 
+
+primates.dna
+```
+
+```{r}
+primates.phyDat <- phyDat(primates.dna, 
+                          type = "DNA", 
+                          levels = NULL) 
+
+dm <- dist.dna(primates.dna, model="JC69")
+
+treeNJ <- NJ(dm)
+
+fitJC = pml(treeNJ, data=primates.phyDat) 
+fitJCbranch = optim.pml(fitJC, model="JC") 
+
+fitJCbranch
+```
+
+```{r}
+AIC_JC <- -2* fitJCbranch$logLik + (2*11) 
+
+AIC_JC
+```
+
+```{r}
+fitF81branch = optim.pml(fitJCbranch, model="F81") 
+
+AIC_F81 <- -2* fitF81branch$logLik + (2*14) 
+
+AIC_F81
+```
+
+```{r}
+fitGTRbranch = optim.pml(fitF81branch, model="GTR") 
+
+fitGTRbranch
+
+AIC_GTR <- -2* fitGTRbranch$logLik + (2*19)
+
+AIC_GTR
+```
+
+**Question 1**: The best model has the lowest AIC.
+
+-   JC: `r AIC_JC`
+-   F81: `r AIC_F81`
+-   GTR: `r AIC_GTR`
+
+Of these, the lowest is the GTR model, making it the best.
+
+```{r}
+fitGTR <- update(fitGTRbranch, k=4)
+fitGTRbranchG = optim.pml(fitGTR, model="GTR", optGamma=T) 
+
+fitGTRbranchG
+```
+
+**Question 2**: The log likelihood of this model is `r fitGTRbranchG$logLik`. Compare this to the log likelihood of the JC model: `r fitJCbranch$logLik`, the F81 model: `r fitF81branch$logLik`, and the GTR model: `r fitGTRbranch$logLik`. The gamma GTR model has the best (lowest) log likelihood.
+
+```{r}
+rooted.tree <- reroot.tree(fitGTRbranchG$tree, "ringtailed_lemur") 
+
+plot(rooted.tree)
+```
+
+![GTR plot](~/Documents/phylo/Exercise10/alignment_GTR_tree.png)
+
+**Question 3**: The arrangement of species is mostly the same, there's only a small difference in the lengths of some branches (such as the chimpanzee/human branch).
+
+```{r}
+AIC_GTRG <- -2* fitGTRbranchG$logLik + (2*20) 
+
+AIC_GTRG
+```
+
+**Question 4**: Yes
+
+```{r}
+mt <- modelTest(primates.phyDat, model="all") 
+
+mt
+```
+
+**Question 5**: The first row is the JC model, and the log likelihood and AIC are the same as calculated above. 
+
+```{r}
+best.model <- mt[which.min(mt$AIC),] 
+
+best.model
+```
+
+**Question 6**: The AIC for the best model is `r best.model$AIC`, which implies that the previous models were too complex. 
+
+
+```{r}
+env <- attr(mt, "env")
+best.fit <- eval(
+  get(
+    as.character(
+      best.model[1]),
+    env), 
+  env)
+
+best.fit
+```
+
+**Question 7**: This rate matrix implies that transitions ($A \to G$ and $C \to T$) happen at a higher rate (11.28 and 7.06) happen at higher rates than transversions ($A \to T$ and $C \to G$, etc...) (0.43). This is consistent with our observation that transitions (purine to purine, pyrimidine to pyrimidine) are more common since the molecules are structurally more similar. 
+
+Additionally, the $A \to G$ transition occurs at a higher rate than the $C \to T$ transition, while all the transversion rates are equal. 
+
+```{r}
+rooted.tree <- reroot.tree(best.fit$tree, "ringtailed_lemur") 
+
+plot(rooted.tree)
+```
+
+**Question 8**: The GTR+G and TIM1+G(4)+I trees are almost imperceptibly different- they have slightly different branch lengths. 
